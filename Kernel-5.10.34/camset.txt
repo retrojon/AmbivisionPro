@@ -1,0 +1,3 @@
+media-ctl --device /dev/media1 --set-v4l2 '"ov5640 1-003c":0[fmt:YUYV8_2X8/640x480]'
+v4l2-ctl -d /dev/video1 --set-fmt-video=width=640,height=480,pixelformat=YUYV
+v4l2-ctl -d /dev/video1 --stream-mmap --stream-count=30 --stream-to=/tmp/frame.raw
