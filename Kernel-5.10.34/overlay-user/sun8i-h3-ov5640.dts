@@ -1,0 +1,90 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "allwinner,sun8i-h3";
+
+	fragment@20 {
+		target-path = "/";
+		__overlay__ {
+			/* Single load-switch enable (PD14) gating the sensor's rails. */
+			reg_cam_pwr: cam-power-en {
+				compatible = "regulator-fixed";
+				regulator-name = "cam-power-en";
+				regulator-min-microvolt = <2800000>;
+				regulator-max-microvolt = <2800000>;
+				gpio = <&pio 3 14 0>; /* PD14, POWER_EN, active high */
+				enable-active-high;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+		};
+	};
+};
+
+&ccu {
+	assigned-clocks = <&ccu 107>;      /* CLK_CSI_MCLK */
+	assigned-clock-parents = <&osc24M>;
+	assigned-clock-rates = <24000000>;
+};
+
+&pio {
+	csi_mclk_pin: csi-mclk-pin {
+		pins = "PE1";
+		function = "csi";
+	};
+};
+
+&i2c2_pins {
+	bias-pull-up;
+};
+
+&i2c2 {
+	status = "okay";
+
+	ov5640: camera@3c {
+		compatible = "ovti,ov5640";
+		reg = <0x3c>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&csi_mclk_pin>;
+		clocks = <&ccu 107>;
+		clock-names = "xclk";
+
+		AVDD-supply = <&reg_cam_pwr>;
+		DOVDD-supply = <&reg_cam_pwr>;
+		DVDD-supply = <&reg_cam_pwr>;
+
+		reset-gpios = <&pio 4 14 1>;    /* PE14, active low */
+		powerdown-gpios = <&pio 4 15 0>; /* PE15, active high */
+
+		port {
+			ov5640_ep: endpoint {
+				remote-endpoint = <&csi_ep>;
+				bus-width = <8>;
+				data-shift = <2>; /* lines 9:2 used */
+				hsync-active = <1>;
+				vsync-active = <0>;
+				data-active = <1>;
+				pclk-sample = <1>;
+			};
+		};
+	};
+};
+
+&csi {
+	status = "okay";
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		csi_ep: endpoint {
+			remote-endpoint = <&ov5640_ep>;
+			bus-width = <8>;
+			hsync-active = <1>;
+			vsync-active = <0>;
+			data-active = <1>;
+			pclk-sample = <1>;
+		};
+	};
+};

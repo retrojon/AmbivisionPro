@@ -1,0 +1,11 @@
+verbosity=7
+bootlogo=false
+#console=ttyS0,115200n8
+#extraargs=console=tty1
+disp_mode=1920x1080p60
+overlay_prefix=sun8i-h3
+overlays=usbhost2 usbhost3
+rootdev=UUID=a0744fa4-dd09-4d34-ba2a-82549cb560b8
+rootfstype=ext4
+user_overlays=sun8i-h3-ov5640
+usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u
